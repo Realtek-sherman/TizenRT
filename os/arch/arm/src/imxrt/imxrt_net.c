@@ -61,6 +61,8 @@
 void up_netinitialize(void)
 {
 #ifdef CONFIG_SELECT_RTK_WLAN && CONFIG_LWNL80211_RTK
+	extern struct lwnl80211_lowerhalf_s *rtk_drv_initialize(void);
+	extern int lwnl80211_register(struct lwnl80211_lowerhalf_s *dev);
 	FAR struct lwnl80211_lowerhalf_s *rtk_drv_lwnl80211;
 	int ret;
 	rtk_drv_lwnl80211 = rtk_drv_initialize();
