@@ -27,7 +27,6 @@
 #elif defined(USE_USB_INTERFACE)
 	#define CONFIG_USB_HCI
 #else
-#error "777777777777777777777777777777777"
 	#define CONFIG_GSPI_HCI
 #endif
 #endif

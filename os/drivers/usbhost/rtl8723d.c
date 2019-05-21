@@ -640,10 +640,11 @@ unsigned char usbhost_get_bulk_out_pipe(void *priv,unsigned char en_addr)
 /*****************************************************************************
 usb bulk in
 *****************************************************************************/
-ssize_t usbhost_bulk_in(void *priv,unsigned char pipe,unsigned char *buf,unsigned int len)
+int usbhost_bulk_in(void *priv,unsigned char pipe,unsigned char *buf,unsigned int len,usbhost_asynch_t callback,void *arg)
 {
 	FAR struct usbhost_rtk_wifi_s *p_rtk_wifi_usb = (struct usbhost_rtk_wifi_s *)priv;
 	FAR struct usbhost_hubport_s *hport;
+	int  ret;
 
 	DEBUGASSERT(p_rtk_wifi_usb != NULL && p_rtk_wifi_usb->usbclass.hport);
 	hport = p_rtk_wifi_usb->usbclass.hport;
@@ -652,31 +653,33 @@ ssize_t usbhost_bulk_in(void *priv,unsigned char pipe,unsigned char *buf,unsigne
 		return -ENODEV;
 	}
 	
-	return DRVR_TRANSFER(hport->drvr,p_rtk_wifi_usb->bulkin[pipe],buf,len);
+	ret = DRVR_ASYNCH(hport->drvr,p_rtk_wifi_usb->bulkin[pipe],buf,len,callback,arg);
 
+exit:
+	return ret;	
 }
 
 /*****************************************************************************
 usb bulk out
 *****************************************************************************/
-ssize_t usbhost_bulk_out(void *priv,unsigned char pipe,unsigned char *buf,unsigned int len)
+int usbhost_bulk_out(void *priv,unsigned char pipe,unsigned char *buf,unsigned int len,usbhost_asynch_t callback,void *arg)
 {
 	FAR struct usbhost_rtk_wifi_s *p_rtk_wifi_usb = (struct usbhost_rtk_wifi_s *)priv;
 	FAR struct usbhost_hubport_s *hport;
-	ssize_t  nwritten_bytes = -1;
+	int ret;
 
 	DEBUGASSERT(p_rtk_wifi_usb != NULL && p_rtk_wifi_usb->usbclass.hport);
 	hport = p_rtk_wifi_usb->usbclass.hport;
 	
 	if(p_rtk_wifi_usb->disconnected){
-		nwritten_bytes = -ENODEV;
+		ret = -ENODEV;
 		goto exit;
 	}
 
-	nwritten_bytes = DRVR_TRANSFER(hport->drvr,p_rtk_wifi_usb->bulkout[pipe],buf,len);
-		
+	ret = DRVR_ASYNCH(hport->drvr,p_rtk_wifi_usb->bulkout[pipe],buf,len,callback,arg);
+
 exit:
-	return nwritten_bytes;
+	return ret;
 }
 
 /*****************************************************************************

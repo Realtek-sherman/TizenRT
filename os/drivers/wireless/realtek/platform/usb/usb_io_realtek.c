@@ -8,8 +8,8 @@ int usbhost_get_in_ep_info(void *priv, unsigned char *ep_addr_array);
 int usbhost_get_out_ep_info(void *priv, unsigned char *ep_addr_array);
 unsigned char usbhost_get_bulk_in_pipe(void *priv,unsigned char en_addr);
 unsigned char usbhost_get_bulk_out_pipe(void *priv,unsigned char en_addr);
-int usbhost_bulk_in(void *priv,unsigned char pipe,unsigned char *buf,unsigned int len);
-int usbhost_bulk_out(void *priv,unsigned char pipe,unsigned char *buf,unsigned int len);
+int usbhost_bulk_in(void *priv,unsigned char pipe,unsigned char *buf,unsigned int len,usbhost_asynch_t callback,void *arg);
+int usbhost_bulk_out(void *priv,unsigned char pipe,unsigned char *buf,unsigned int len,usbhost_asynch_t callback,void *arg);
 int usbhost_cancel_bulk_in(void *priv);
 int usbhost_cancel_bulk_out(void *priv);
 
@@ -90,52 +90,14 @@ static unsigned char rtw_usb_get_bulk_out_pipe(void *priv,unsigned char ep_addr)
 	return usbhost_get_bulk_out_pipe(priv,ep_addr);
 }
 
-ssize_t  nread_bytes = 0;
-
 static int rtw_usb_bulk_in(void *priv,unsigned char pipe,unsigned char *buf,unsigned int len,usb_complete callback,void *arg)
 {
-	int ret = 0;
-
-	nread_bytes = 0;
-
-	//printf("rtw_usb_bulk_in:  buf = %x,len = %d \n",buf,len);
-	
-	nread_bytes = usbhost_bulk_in(priv,pipe,buf,len);
-	
-	if(nread_bytes > 0){
-		ret = 0;
-		//printf("usb bulk in: nbytes = %d \n",nread_bytes);
-		//callback(arg,nread_bytes);
-	}
-	else{
-		printf("usb bulk in fail: %d \n",nread_bytes);
-		nread_bytes = 0;
-	}
-
-	return ret;
+	return usbhost_bulk_in(priv,pipe,buf,len, callback,arg);
 }
 
 static int rtw_usb_bulk_out(void *priv,unsigned char pipe,unsigned char *buf,unsigned int len,usb_complete callback,void *arg)
 {
-	ssize_t nwritten_bytes = 0;
-	int ret = 0;
-
-	//printf("usb bulk out : pipe = %d \n",pipe);
-
-	nwritten_bytes = usbhost_bulk_out(priv,pipe,buf,len);
-
-	//printf("nwritten_bytes = %d \n",nwritten_bytes);
-
-	if(nwritten_bytes > 0){
-		ret = 0;
-		callback(arg,nwritten_bytes);
-	}
-	else{
-		printf("usb bulk out fail: %d \n",nwritten_bytes);
-		nwritten_bytes = 0;
-	}
-
-	return ret;
+	return usbhost_bulk_out(priv,pipe,buf,len, callback,arg);
 }
 
 static int rtw_usb_cancel_bulk_in(void *priv)
