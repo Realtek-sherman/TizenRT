@@ -691,8 +691,8 @@ struct dvobj_priv
 	_mutex rf_read_reg_mutex;
 
 	//In /Out Pipe information
-	int	RtInPipe[2]; //xhl modify 1226
-	int	RtOutPipe[6];//u8	RtOutPipe[3]; xhl modify 01.23
+	u8	RtInPipe[2]; //xhl modify 1226
+	u8	RtOutPipe[6];//u8	RtOutPipe[3]; xhl modify 01.23
 	u8	Queue2Pipe[HW_QUEUE_ENTRY];//for out pipe mapping
 
 	//u8	irq_alloc;
@@ -736,6 +736,9 @@ struct dvobj_priv
 /*-------- below is for USB INTERFACE --------*/
 
 #ifdef CONFIG_USB_HCI
+#ifdef INTF_DATA
+		INTF_DATA intf_data;
+#endif
 	u8	HardwareType;
 	u8	usb_speed; /* 1.1, 2.0 or 3.0 */
 	u8	irq_alloc; 

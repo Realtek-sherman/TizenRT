@@ -111,10 +111,13 @@ extern void spi_int_hdl(PADAPTER padapter);
 //#include <usb_ops.h>
 //#include <usb_osintf.h>
 #include <usb/usb_spec.h>
+#include "usb_io_realtek.h"
 #define GSPI_STATUS_LEN		8    //  xhl
 #define HAL_INTERFACE_CMD_LEN			0
 #define HAL_INTERFACE_CMD_STATUS_LEN   	0
 #define RX_RESERV_HEADROOM                     (SKB_WLAN_TX_EXTRA_LEN>RX_DRIVER_INFO+RXDESC_SIZE)?(SKB_WLAN_TX_EXTRA_LEN-RX_DRIVER_INFO-RXDESC_SIZE):0
+
+#define INTF_DATA USB_DATA
 
 #elif defined(CONFIG_PCI_HCI)
 #include <pci_osintf.h>
