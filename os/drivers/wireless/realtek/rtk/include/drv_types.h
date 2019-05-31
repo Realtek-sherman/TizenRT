@@ -691,8 +691,8 @@ struct dvobj_priv
 	_mutex rf_read_reg_mutex;
 
 	//In /Out Pipe information
-	u8	RtInPipe[2]; //xhl modify 1226
-	u8	RtOutPipe[6];//u8	RtOutPipe[3]; xhl modify 01.23
+	int	RtInPipe[2]; //xhl modify 1226
+	int	RtOutPipe[6];//u8	RtOutPipe[3]; xhl modify 01.23
 	u8	Queue2Pipe[HW_QUEUE_ENTRY];//for out pipe mapping
 
 	//u8	irq_alloc;
@@ -1059,6 +1059,7 @@ struct _ADAPTER{
 #if defined(CONFIG_RECV_THREAD_MODE)
 	struct task_struct	recvThread;
 #endif
+
 #ifdef CONFIG_RECV_TASKLET_THREAD
 	struct task_struct	recvtasklet_thread;
 #endif

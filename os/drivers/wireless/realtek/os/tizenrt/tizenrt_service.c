@@ -211,16 +211,16 @@ static u32 _tizenrt_down_sema(_sema *sema, u32 timeout)
 static void _tizenrt_mutex_init(_mutex *pmutex)
 {
       
-       *pmutex=_tizenrt_zmalloc(sizeof(pthread_mutex_t));
-		pthread_mutex_init(*pmutex,NULL);
+   *pmutex=_tizenrt_zmalloc(sizeof(pthread_mutex_t));
+	pthread_mutex_init(*pmutex,NULL);
 
 }
 
 
 static void _tizenrt_mutex_free(_mutex *pmutex)
 {
-		pthread_mutex_destroy(*pmutex);
-		free(*pmutex);
+	pthread_mutex_destroy(*pmutex);
+	free(*pmutex);
 }
 
 
@@ -243,9 +243,7 @@ static int _tizenrt_mutex_get_timeout(_lock *plock, u32 timeout_ms)
 
 static void _tizenrt_mutex_put(_lock *plock)
 {
-
-		
-		pthread_mutex_unlock(*plock);
+    pthread_mutex_unlock(*plock);
 }
 
 
@@ -279,10 +277,11 @@ static void _tizenrt_exit_critical_from_isr(_lock *plock, _irqL *pirqL)
 static int _tizenrt_enter_critical_mutex(_mutex *pmutex, _irqL *pirqL)
 {
 
-	    int temp;	   
+	int temp;	   
 	temp=pthread_mutex_lock(*pmutex);
-	if(temp!=0) DBG_ERR("_tizenrt_enter_critical_mutex %s failed!\n"); 
-		return temp;
+	if(temp!=0) 
+        DBG_ERR("_tizenrt_enter_critical_mutex %s failed!\n"); 
+	return temp;
 
 }
 

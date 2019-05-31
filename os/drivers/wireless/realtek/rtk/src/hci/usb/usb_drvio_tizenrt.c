@@ -1471,6 +1471,7 @@ void usb_set_intf_ops(struct _io_ops	*pops)
 #include "usb_io_realtek.h"
 
 extern USB_BUS_OPS rtw_usb_bus_ops;
+_mutex usb_host_mutex;
 
 
 u8 usb_read8(struct dvobj_priv *pdvobj, u32 addr, s32 *err)
@@ -1480,7 +1481,9 @@ u8 usb_read8(struct dvobj_priv *pdvobj, u32 addr, s32 *err)
 	u8 data = 0;
 	len = 1;
 
+    rtw_mutex_get(&usb_host_mutex);
 	rtw_usb_bus_ops.usb_ctrl_req(pusb_data->usb_intf,1,addr,&data,len);
+    rtw_mutex_put(&usb_host_mutex);
 
 	return data;
 }
@@ -1493,7 +1496,9 @@ u16 usb_read16(struct dvobj_priv *pdvobj, u32 addr, s32 *err)
 	u16 data = 0;
 	len = 2;
 
+    rtw_mutex_get(&usb_host_mutex);
 	rtw_usb_bus_ops.usb_ctrl_req(pusb_data->usb_intf,1,addr,data_array,len);
+    rtw_mutex_put(&usb_host_mutex);
 
 	data = data_array[0];
 	data |= data_array[1]<<8;
@@ -1510,7 +1515,9 @@ u32 usb_read32(struct dvobj_priv *pdvobj, u32 addr, s32 *err)
 	len = 4;
 	int i;
 
+    rtw_mutex_get(&usb_host_mutex);
 	rtw_usb_bus_ops.usb_ctrl_req(pusb_data->usb_intf,1,addr,data_array,len);
+    rtw_mutex_put(&usb_host_mutex);
 
 	data = data_array[0];
 	data |= data_array[1]<<8;
@@ -1527,10 +1534,13 @@ int usb_write8(struct dvobj_priv *pdvobj, u32 addr, u8 buf, s32 *err)
 {
 	PUSB_DATA pusb_data = &pdvobj->intf_data;
 	unsigned int len;
+    int ret = 0;
 	len = 1;
 
-	return rtw_usb_bus_ops.usb_ctrl_req(pusb_data->usb_intf,0,addr,&buf,len);
-
+    rtw_mutex_get(&usb_host_mutex);
+	ret = rtw_usb_bus_ops.usb_ctrl_req(pusb_data->usb_intf,0,addr,&buf,len);
+    rtw_mutex_put(&usb_host_mutex);
+    return ret;
 }
 
 
@@ -1538,9 +1548,13 @@ int usb_write16(struct dvobj_priv *pdvobj, u32 addr, u16 buf, s32 *err)
 {
 	PUSB_DATA pusb_data = &pdvobj->intf_data;
 	unsigned int len;
+    int ret = 0;
 	len = 2;
 
-	return rtw_usb_bus_ops.usb_ctrl_req(pusb_data->usb_intf,0,addr,&buf,len);
+	rtw_mutex_get(&usb_host_mutex);
+	ret = rtw_usb_bus_ops.usb_ctrl_req(pusb_data->usb_intf,0,addr,&buf,len);
+    rtw_mutex_put(&usb_host_mutex);
+    return ret;
 
 }
 
@@ -1548,16 +1562,25 @@ int usb_write32(struct dvobj_priv *pdvobj, u32 addr, u32 buf, s32 *err)
 {
 	PUSB_DATA pusb_data = &pdvobj->intf_data;
 	unsigned int len;
+    int ret = 0;
 	len = 4;
 	
-	return rtw_usb_bus_ops.usb_ctrl_req(pusb_data->usb_intf,0,addr,&buf,len);
+	rtw_mutex_get(&usb_host_mutex);
+	ret = rtw_usb_bus_ops.usb_ctrl_req(pusb_data->usb_intf,0,addr,&buf,len);
+    rtw_mutex_put(&usb_host_mutex);
+    return ret;
 
 }
 
 int usb_writeN(struct dvobj_priv *pdvobj, u32 addr, u8 *buf,u32 len, s32 *err)
 {
 	PUSB_DATA pusb_data = &pdvobj->intf_data;
-	return rtw_usb_bus_ops.usb_ctrl_req(pusb_data->usb_intf,0,addr,buf,len);
+    int ret = 0;
+    
+	rtw_mutex_get(&usb_host_mutex);
+	ret = rtw_usb_bus_ops.usb_ctrl_req(pusb_data->usb_intf,0,addr,buf,len);
+    rtw_mutex_put(&usb_host_mutex);
+    return ret;
 }
 
 
@@ -1704,7 +1727,7 @@ void usb_read_port_complete(void *arg, ssize_t  result)
 	_adapter			*padapter = (_adapter *)precvbuf->adapter;
 	struct recv_priv	*precvpriv = &padapter->recvpriv;
 	
-	/*************************************************************/
+	/*************************************************************
 	int q;
 	printf("\r\n -------------usb_read_port_complete result= %d \n",result);
 	printf("dump packet \n");
@@ -1715,7 +1738,6 @@ void usb_read_port_complete(void *arg, ssize_t  result)
 			printf("\n");
 		
 	}
-	printf("\n");
 	/*************************************************************/
 	//ndbg("\r\n==============>>22222222222222222\r\n");
 	if (precvbuf == NULL) {
@@ -1734,7 +1756,7 @@ void usb_read_port_complete(void *arg, ssize_t  result)
 
 	if ((result > MAX_RECVBUF_SZ) || (result < RXDESC_SIZE)) {
 		DBG_871X("usb_read_port_complete: length(%d) is invalid \n",result);
-		rtw_read_port(padapter, precvpriv->ff_hwaddr, 0, (unsigned char *)precvbuf,0);
+		return;
 	} else {
 		rtw_reset_continual_io_error(adapter_to_dvobj(padapter));
 
@@ -1752,7 +1774,7 @@ void usb_read_port_complete(void *arg, ssize_t  result)
 		#endif
 
 		precvbuf->pskb = NULL;
-		rtw_read_port(padapter, precvpriv->ff_hwaddr, 0, (unsigned char *)precvbuf,0);
+		return;
 	}
 
 }
@@ -1823,7 +1845,7 @@ recv_buf_hook:
 	/* translate DMA FIFO addr to pipehandle */
 	pipe = ffaddr2pipehdl(pdvobj, addr);
 
-	ndbg("\r\npipe = %d\r\n",pipe);
+	//ndbg("\r\npipe = %d\r\n",pipe);
 
 	err = rtw_usb_bus_ops.usb_bulk_in(
 		pusb_data->usb_intf,
@@ -1976,6 +1998,7 @@ u32 usb_write_port(struct dvobj_priv *pdvobj, u32 addr, u8 *buf, u32 len)
 	pipe = ffaddr2pipehdl(pdvobj, addr);
 #endif
 
+    rtw_mutex_get(&usb_host_mutex);
 	err = rtw_usb_bus_ops.usb_bulk_out(
 		pusb_data->usb_intf,
 		pipe,
@@ -1984,6 +2007,7 @@ u32 usb_write_port(struct dvobj_priv *pdvobj, u32 addr, u8 *buf, u32 len)
 	       usb_write_port_complete,
 	       pxmitbuf
 	);
+    rtw_mutex_put(&usb_host_mutex);
 
 	if (err < 0) {
 		rtw_sctx_done_err(&pxmitbuf->sctx, RTW_SCTX_DONE_WRITE_PORT_ERR);
@@ -2208,8 +2232,10 @@ void usb_read_port_cancel(struct dvobj_priv *pdvobj)
 	PUSB_DATA pusb_data;
 
 	pusb_data = &pdvobj->intf_data;
-
+    
+    rtw_mutex_get(&usb_host_mutex);
 	rtw_usb_bus_ops.usb_cancel_bulk_in(pusb_data->usb_intf);
+    rtw_mutex_put(&usb_host_mutex);
 }
 
 void usb_write_port_cancel(struct dvobj_priv *pdvobj)
@@ -2218,7 +2244,9 @@ void usb_write_port_cancel(struct dvobj_priv *pdvobj)
 
 	pusb_data = &pdvobj->intf_data;
 
+    rtw_mutex_get(&usb_host_mutex);
 	rtw_usb_bus_ops.usb_cancel_bulk_out(pusb_data->usb_intf);
+    rtw_mutex_put(&usb_host_mutex);
 }
 
 void usb_set_intf_ops(struct _io_ops	*pops)
@@ -2243,7 +2271,7 @@ void usb_set_intf_ops(struct _io_ops	*pops)
 
 	//if(bmutext_init == 0){
 	//	bmutext_init = 1;
-		//rtw_mutex_init(&usb_host_mutex);
+    rtw_mutex_init(&usb_host_mutex);
 	//}
 }
 

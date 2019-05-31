@@ -9,6 +9,8 @@ typedef struct USB_DATA_S{
 	void *usb_intf;
 }USB_DATA,*PUSB_DATA;
 
+void usb_thread(void *priv);
+
 typedef  void (*usb_complete)(void *arg, ssize_t result);
 
 typedef struct _USB_BUS_OPS{

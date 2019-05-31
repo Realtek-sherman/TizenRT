@@ -347,6 +347,7 @@ static int usbhost_cfgdesc(FAR struct usbhost_rtk_wifi_s *priv, FAR const uint8_
  *     must call to DISCONNECTED method to recover from the error
  *
  ****************************************************************************/
+unsigned char usb_thread_active = 0;
 
 static int usbhost_connect(FAR struct usbhost_class_s *usbclass, FAR const uint8_t *configdesc, int desclen)
 {
@@ -356,7 +357,26 @@ static int usbhost_connect(FAR struct usbhost_class_s *usbclass, FAR const uint8
 	DEBUGASSERT(priv != NULL && configdesc != NULL && desclen >= sizeof(struct usb_cfgdesc_s));
 
 	printf("-------------> usbhost_connect \n");
+    extern pthread_startroutine_t _usb_thread;
+    
+    pthread_t taskID;
+    pthread_attr_t thread_attr;
+    struct sched_param schedule_param;  
+    pthread_attr_init(&thread_attr);
+    schedule_param.sched_priority = 124;
+    pthread_attr_setstacksize(&thread_attr, 1024*6);
+    pthread_attr_setinheritsched(&thread_attr, PTHREAD_EXPLICIT_SCHED); 
+    pthread_attr_setschedpolicy(&thread_attr,SCHED_RR);
+    pthread_attr_setschedparam(&thread_attr, &schedule_param); 
 
+    usb_thread_active = 1;
+
+    ret = pthread_create(&taskID, &thread_attr, _usb_thread, (void *)NULL);
+
+    if (ret < 0){
+        ndbg("_tizenrt_set_timer failed!------------------  \n");
+    }
+    
 	/* Parse the configuration descriptor to get the endpoints */
 	ret = usbhost_cfgdesc(priv, configdesc, desclen);
 	if (ret < 0) {
@@ -390,9 +410,11 @@ static void usbhost_destroy(FAR void *arg)
 	FAR struct usbhost_hubport_s *hport;
 	int i;
 
+    usb_thread_active = 0;
+
 	DEBUGASSERT(priv != NULL && priv->usbclass.hport != NULL);
 	hport = priv->usbclass.hport;
-
+    
 	/* Free the allocated endpoints */
 	for(i=0;i<priv->nr_inep;i++) {
 		DRVR_EPFREE(hport->drvr, priv->bulkin[i]);
@@ -640,11 +662,10 @@ unsigned char usbhost_get_bulk_out_pipe(void *priv,unsigned char en_addr)
 /*****************************************************************************
 usb bulk in
 *****************************************************************************/
-int usbhost_bulk_in(void *priv,unsigned char pipe,unsigned char *buf,unsigned int len,usbhost_asynch_t callback,void *arg)
+ssize_t usbhost_bulk_in(void *priv,unsigned char pipe,unsigned char *buf,unsigned int len)
 {
 	FAR struct usbhost_rtk_wifi_s *p_rtk_wifi_usb = (struct usbhost_rtk_wifi_s *)priv;
 	FAR struct usbhost_hubport_s *hport;
-	int  ret;
 
 	DEBUGASSERT(p_rtk_wifi_usb != NULL && p_rtk_wifi_usb->usbclass.hport);
 	hport = p_rtk_wifi_usb->usbclass.hport;
@@ -653,33 +674,31 @@ int usbhost_bulk_in(void *priv,unsigned char pipe,unsigned char *buf,unsigned in
 		return -ENODEV;
 	}
 	
-	ret = DRVR_ASYNCH(hport->drvr,p_rtk_wifi_usb->bulkin[pipe],buf,len,callback,arg);
+	return DRVR_TRANSFER(hport->drvr,p_rtk_wifi_usb->bulkin[pipe],buf,len);
 
-exit:
-	return ret;	
 }
 
 /*****************************************************************************
 usb bulk out
 *****************************************************************************/
-int usbhost_bulk_out(void *priv,unsigned char pipe,unsigned char *buf,unsigned int len,usbhost_asynch_t callback,void *arg)
+ssize_t usbhost_bulk_out(void *priv,unsigned char pipe,unsigned char *buf,unsigned int len)
 {
 	FAR struct usbhost_rtk_wifi_s *p_rtk_wifi_usb = (struct usbhost_rtk_wifi_s *)priv;
 	FAR struct usbhost_hubport_s *hport;
-	int ret;
+	ssize_t  nwritten_bytes = -1;
 
 	DEBUGASSERT(p_rtk_wifi_usb != NULL && p_rtk_wifi_usb->usbclass.hport);
 	hport = p_rtk_wifi_usb->usbclass.hport;
 	
 	if(p_rtk_wifi_usb->disconnected){
-		ret = -ENODEV;
+		nwritten_bytes = -ENODEV;
 		goto exit;
 	}
 
-	ret = DRVR_ASYNCH(hport->drvr,p_rtk_wifi_usb->bulkout[pipe],buf,len,callback,arg);
-
+	nwritten_bytes = DRVR_TRANSFER(hport->drvr,p_rtk_wifi_usb->bulkout[pipe],buf,len);
+		
 exit:
-	return ret;
+	return nwritten_bytes;
 }
 
 /*****************************************************************************
