@@ -56,12 +56,16 @@ _func_enter_;
 
     while(1){
 
+        //ndbg("\r\nusb_thread running");
+
         if (!usb_thread_active){
             ndbg("\r\nusb_thread_active is disabled\r\n" );
             break;
         }
         
         if(rtk_usb_running){
+
+            //ndbg("\r\nrtk_usb_running");
 
             if((padapter == NULL) && (padapter_for_Tizenrt != NULL)){
                 padapter = padapter_for_Tizenrt;
@@ -70,23 +74,23 @@ _func_enter_;
                 precvbuf = (struct recv_buf *)precvpriv->precv_buf;
             }
             count = rtw_read8(padapter,0x287);
+            
 #if 1
             if(count != 0)
             {
-                //printf("count = %d \n",count);
+                //ndbg("count = %d \n",count);
                 for(i=0;i<count;i++)
                 {
                     rtw_mutex_get(&usb_host_mutex);
                     rtw_read_port(padapter, precvpriv->ff_hwaddr, 0, (unsigned char *)precvbuf,0);
-                    rtw_mutex_put(&usb_host_mutex);
                     usb_read_port_complete((void *)precvbuf,nread_bytes);
+                    rtw_mutex_put(&usb_host_mutex);
 
                     if(i == 5){
-                        printf("received 5 pkts \n");
+                        //printf("received 5 pkts \n");
                         continue;
                     }
                         
-                    
                 }
             }
             else
@@ -98,6 +102,7 @@ _func_enter_;
             
         }else{
             ndbg("\r\n******************sleep");
+            padapter = NULL;
             rtw_msleep_os(2000);
         }
     }  
@@ -125,20 +130,20 @@ static int rtw_usb_get_speed_info(void *priv)
 
 	switch (usb_speed) {
 	case 1:
-		 printf("Low Speed Case \n");
-		 ret = RTW_USB_SPEED_1_1;
-		 break;
+        printf("Low Speed Case \n");
+        ret = RTW_USB_SPEED_1_1;
+        break;
 	case 2:
-		 printf("full speed Case \n");
-		 ret = RTW_USB_SPEED_1_1;
-		 break;
+        printf("full speed Case \n");
+        ret = RTW_USB_SPEED_1_1;
+        break;
 	case 3:
-		 printf("high speed Case \n");
-		 ret = RTW_USB_SPEED_2;
-		 break;
+        printf("high speed Case \n");
+        ret = RTW_USB_SPEED_2;
+        break;
 	default:
-		ret = 0;
-		break;
+        ret = 0;
+        break;
 	}
 
 	return ret;
@@ -175,6 +180,7 @@ static int rtw_usb_bulk_in(void *priv,unsigned char pipe,unsigned char *buf,unsi
     
     if(!rtk_usb_running){
         rtk_usb_running = 1;
+        ndbg("\r\n[rtw_usb_bulk_in]:rtk_usb_running enabled");
     }
 	//printf("rtw_usb_bulk_in:  buf = %x,len = %d \n",buf,len);
 	
@@ -220,6 +226,7 @@ static int rtw_usb_cancel_bulk_in(void *priv)
 {
     if(rtk_usb_running){
         rtk_usb_running = 0;
+        ndbg("\r\n[rtw_usb_cancel_bulk_in]:rtk_usb_running disabled");
     }
     
 	return usbhost_cancel_bulk_in(priv);

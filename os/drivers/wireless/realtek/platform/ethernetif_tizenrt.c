@@ -137,7 +137,7 @@ static void low_level_init(struct netif *netif)
 static err_t low_level_output(struct netif *netif, struct pbuf *p)
 {
 
-	printf("\r\n ===================>>Enter low_level_output\r\n");
+	//printf("\r\n ===================>>Enter low_level_output\r\n");
   /* Refer to eCos lwip eth_drv_send() */
 	struct eth_drv_sg sg_list[MAX_ETH_DRV_SG];
 	int sg_len = 0;

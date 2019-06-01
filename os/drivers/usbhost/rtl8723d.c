@@ -363,7 +363,7 @@ static int usbhost_connect(FAR struct usbhost_class_s *usbclass, FAR const uint8
     pthread_attr_t thread_attr;
     struct sched_param schedule_param;  
     pthread_attr_init(&thread_attr);
-    schedule_param.sched_priority = 124;
+    schedule_param.sched_priority = 123;
     pthread_attr_setstacksize(&thread_attr, 1024*6);
     pthread_attr_setinheritsched(&thread_attr, PTHREAD_EXPLICIT_SCHED); 
     pthread_attr_setschedpolicy(&thread_attr,SCHED_RR);
