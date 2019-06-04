@@ -2249,6 +2249,8 @@ void usb_write_port_cancel(struct dvobj_priv *pdvobj)
     rtw_mutex_put(&usb_host_mutex);
 }
 
+static unsigned char bmutext_init = 0;
+
 void usb_set_intf_ops(struct _io_ops	*pops)
 {
 	pops->init_io_priv = NULL;
@@ -2269,10 +2271,10 @@ void usb_set_intf_ops(struct _io_ops	*pops)
 	pops->_write_port_cancel = &usb_write_port_cancel;
 	printf("\r\n-------------------------->\r\n");
 
-	//if(bmutext_init == 0){
-	//	bmutext_init = 1;
-    rtw_mutex_init(&usb_host_mutex);
-	//}
+	if(bmutext_init == 0){
+		bmutext_init = 1;
+        rtw_mutex_init(&usb_host_mutex);
+	}
 }
 
 #endif

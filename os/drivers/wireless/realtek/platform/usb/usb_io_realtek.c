@@ -102,7 +102,9 @@ _func_enter_;
             
         }else{
             ndbg("\r\n******************sleep");
-            padapter = NULL;
+            if(padapter){
+                padapter = NULL;
+            }
             rtw_msleep_os(2000);
         }
     }  
