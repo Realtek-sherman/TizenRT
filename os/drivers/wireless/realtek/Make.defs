@@ -54,7 +54,7 @@ DEPPATH += --dep-path wireless$(DELIM)realtek$(DELIM)rtk
 #DEPPATH += --dep-path $(DRIVER_DIR)$(DELIM)src$(DELIM)hal$(DELIM)phydm
 #DEPPATH += --dep-path $(DRIVER_DIR)$(DELIM)src$(DELIM)hal$(DELIM)phydm$(DELIM)rtl8723d
 #DEPPATH += --dep-path $(DRIVER_DIR)$(DELIM)src$(DELIM)hci
-DEPPATH += --dep-path $(DRIVER_DIR)$(DELIM)src$(DELIM)hci$(DELIM)usb
+#DEPPATH += --dep-path $(DRIVER_DIR)$(DELIM)src$(DELIM)hci$(DELIM)usb
 #DEPPATH += --dep-path $(DRIVER_DIR)$(DELIM)src$(DELIM)osdep
 #DEPPATH += --dep-path $(DRIVER_DIR)$(DELIM)src$(DELIM)hal$(DELIM)$(RTL871X)
 #DEPPATH += --dep-path $(DRIVER_DIR)$(DELIM)src$(DELIM)hal$(DELIM)$(RTL871X)$(DELIM)usb
@@ -75,7 +75,7 @@ DEPPATH += --dep-path wireless$(DELIM)realtek$(DELIM)wifi_util_interface
 #VPATH += :$(DRIVER_DIR)$(DELIM)src$(DELIM)hal$(DELIM)phydm
 #VPATH += :$(DRIVER_DIR)$(DELIM)src$(DELIM)hal$(DELIM)phydm$(DELIM)rtl8723d
 #VPATH += :$(DRIVER_DIR)$(DELIM)src$(DELIM)hci
-VPATH += :$(DRIVER_DIR)$(DELIM)src$(DELIM)hci$(DELIM)usb
+#VPATH += :$(DRIVER_DIR)$(DELIM)src$(DELIM)hci$(DELIM)usb
 #VPATH += :$(DRIVER_DIR)$(DELIM)src$(DELIM)osdep
 #VPATH += :$(DRIVER_DIR)$(DELIM)src$(DELIM)hal$(DELIM)$(RTL871X)
 #VPATH += :$(DRIVER_DIR)$(DELIM)src$(DELIM)hal$(DELIM)$(RTL871X)$(DELIM)usb
@@ -103,7 +103,7 @@ endif
 
 ######################### usb_io #####################################
 #realtek/rtk/src/hci/usb
-CSRCS += usb_drvio_tizenrt.c
+#CSRCS += usb_drvio_tizenrt.c
 ############################### End UTIL_INTERFACE #########################
 
 ######################### OS AND PLATFORM #####################################

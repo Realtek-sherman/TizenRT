@@ -81,10 +81,8 @@ _func_enter_;
                 //ndbg("count = %d \n",count);
                 for(i=0;i<count;i++)
                 {
-                    rtw_mutex_get(&usb_host_mutex);
                     rtw_read_port(padapter, precvpriv->ff_hwaddr, 0, (unsigned char *)precvbuf,0);
                     usb_read_port_complete((void *)precvbuf,nread_bytes);
-                    rtw_mutex_put(&usb_host_mutex);
 
                     if(i == 5){
                         //printf("received 5 pkts \n");
