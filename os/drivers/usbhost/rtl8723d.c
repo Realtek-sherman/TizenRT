@@ -340,7 +340,7 @@ static int usbhost_cfgdesc(FAR struct usbhost_rtk_wifi_s *priv, FAR const uint8_
  ****************************************************************************/
 unsigned char usb_thread_active = 0;
 #ifndef CONFIG_USBHOST_DEFPRIO
-#define CONFIG_USBHOST_DEFPRIO 120
+#define CONFIG_USBHOST_DEFPRIO 124
 #endif
 #ifndef CONFIG_USBHOST_STACKSIZE
 #define CONFIG_USBHOST_STACKSIZE 8192
@@ -357,12 +357,13 @@ static int usbhost_connect(FAR struct usbhost_class_s *usbclass, FAR const uint8
 	udbg("-------------> usbhost_connect \n");
 	extern main_t _usb_thread;
 
+    usb_thread_active = 1;
 	pid = kernel_thread("USB host", CONFIG_USBHOST_DEFPRIO, CONFIG_USBHOST_STACKSIZE, _usb_thread, (FAR char *const *)NULL);
 	if (pid < 0) {
 		ndbg("_tizenrt_set_timer failed!------------------  \n");
+        usb_thread_active = 0;
 		return pid;
 	}
-	usb_thread_active = 1;
 
 	/* Parse the configuration descriptor to get the endpoints */
 	ret = usbhost_cfgdesc(priv, configdesc, desclen);

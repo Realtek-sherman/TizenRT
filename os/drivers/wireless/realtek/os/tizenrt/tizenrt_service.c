@@ -653,14 +653,14 @@ u32 _tizenrt_timerDelete(_timer *timer,
 	int ret;
 	ret = work_cancel(LPWORK, timer->work_hdl);
 	TC_ASSERT_EQ_CLEANUP("work_cancel", ret, OK, goto cleanup);
-	kmm_free(timer->work_hdl);
+	rtw_mfree(timer->work_hdl,0);
 	timer->timer_hdl = NULL;
 	timer->timevalue = 0;
 	return _SUCCESS;
 
 cleanup:
 	if (ret != -2) {
-		kmm_free(timer->work_hdl);
+		rtw_mfree(timer->work_hdl,0);
 		DBG_ERR("_tizenrt_del_timer failed! ret = %d", ret);
 		return _FAIL;
 	}
@@ -687,7 +687,7 @@ u32 _tizenrt_timerStop(_timer *timer,
 
 cleanup:
 	if (ret != -2) {
-		kmm_free(timer->work_hdl);
+		rtw_mfree(timer->work_hdl,0);
 		DBG_ERR("_tizenrt_stop_timer failed! ret = %d", ret);
 		return _FAIL;
 	}
@@ -743,7 +743,7 @@ u32 _tizenrt_timerChangePeriod(_timer *timer,
 	return _SUCCESS;
 
 cleanup:
-	kmm_free(timer->work_hdl);
+	rtw_mfree(timer->work_hdl,0);
 	timer->timer_hdl = NULL;
 	DBG_ERR("_tizenrt_set_timer failed!");
 	return _FAIL;

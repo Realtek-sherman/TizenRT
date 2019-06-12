@@ -37,6 +37,8 @@ static void rtw_usb_probe(void)
 	printf("rtw_usb_probe <------- \n");
 }
 
+extern void usb_read_port_complete(void *arg,ssize_t result);
+
 int usb_thread(int argc, char *argv[])
 {
 	extern PADAPTER padapter_for_Tizenrt;
@@ -61,6 +63,12 @@ int usb_thread(int argc, char *argv[])
 				precvpriv->ff_hwaddr = RECV_BULK_IN_ADDR;
 				precvbuf = (struct recv_buf *)precvpriv->precv_buf;
 			}
+            if (padapter != NULL) {
+                if (padapter->RxStop) {
+                    rtw_msleep_os(200);
+                    continue;
+                }
+            }
 			count = rtw_read8(padapter, 0x287);
 			if (count != 0) {
 				for (i = 0; i < count; i++) {

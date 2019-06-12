@@ -352,7 +352,7 @@ static void wifi_disconn_hdl(char *buf, int buf_len, int flags, void *userdata)
 #if defined(CONFIG_MBED_ENABLED) || defined(CONFIG_PLATFOMR_CUSTOMER_RTOS)
 //TODO
 #else
-	dhcp_stop(&xnetif[0]);
+	//dhcp_stop(&xnetif[0]);
 #endif
 #endif
 
